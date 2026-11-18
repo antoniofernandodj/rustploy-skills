@@ -113,8 +113,8 @@ Regras:
   Nunca peça o valor no chat.
 - Secret com nome errado vira **texto vazio sem erro**: o nome do `SecretGenerate` e o
   `{"Secret":"…"}` da variável têm de ser idênticos.
-- Daemon antigo responde `unknown variant SecretGenerate`: o rustploy-ms precisa ser
-  atualizado. Até lá, peça à pessoa para criar os secrets na webui
+- Daemon antigo (antes do 0.1.66, release v0.1.79) responde `unknown variant SecretGenerate`:
+  o rustploy-ms precisa ser atualizado. Até lá, peça à pessoa para criar os secrets na webui
   (valor de `JWT_SECRET`: `openssl rand -hex 32` no terminal dela) e avise quem cuida do
   servidor.
 

@@ -14,7 +14,7 @@ Sem o bump, quem já instalou não recebe a atualização.
   (resolver do próprio container, compatível com Podman). As duas imagens foram
   construídas sem BuildKit.
 - Senhas e chaves nascem com `SecretGenerate` (o daemon sorteia; o agente não vê o valor) e
-  a pessoa lê pelo 👁 da webui. Requer o daemon com `SecretGenerate`; num daemon antigo a skill
+  a pessoa lê pelo 👁 da webui. Requer o daemon 0.1.66 ou mais novo (release v0.1.79); num daemon antigo a skill
   cai no caminho manual (a pessoa cria o secret).
 - Ainda **não** validado num deploy real no rustploy-ms: o primeiro app vai confirmar os
   JSONs de `ServiceCreate`/`JobCreate` e o resolver do nginx no Podman.
