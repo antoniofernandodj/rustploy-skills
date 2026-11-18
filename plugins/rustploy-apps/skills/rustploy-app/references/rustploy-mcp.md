@@ -1,9 +1,11 @@
 # Operar o rustploy-ms pelo MCP
 
 Servidor: **rustploy-ms.itemize.com.br**, API e MCP na porta **9797**, interface
-web (webui) em `https://rustploy-ms.itemize.com.br:9797`. As ferramentas aparecem
-como `mcp__rustploy__*` (`status`, `list_services`, `deploy`, `build_logs`,
-`ingress_routes`, `rpc`…). O `rpc` executa qualquer `Command` do daemon.
+web (webui) em `https://rustploy-ms.itemize.com.br:9797`. O servidor MCP se chama
+`rustploy` e tem as ferramentas `status`, `list_services`, `list_deploys`, `deploy`,
+`build_logs`, `ingress_routes`, `ingress_reconcile`, `rpc` e `manual`. Cada agente as
+mostra com um prefixo próprio (no Claude Code, `mcp__rustploy__status`; no Codex, como
+ferramentas do servidor `rustploy`). O `rpc` executa qualquer `Command` do daemon.
 
 > A fonte da verdade dos comandos é a ferramenta `manual` do próprio MCP. Se um
 > JSON daqui for recusado (`400` com a causa do serde), confie no manual e no
@@ -12,18 +14,30 @@ como `mcp__rustploy__*` (`status`, `list_services`, `deploy`, `build_logs`,
 
 ## Conectar
 
-Se as ferramentas `mcp__rustploy__*` não existem na sessão, a pessoa precisa
-conectar o Claude Code ao servidor. Oriente:
+Se as ferramentas do servidor `rustploy` não existem na sessão, a pessoa precisa
+conectar o agente ao servidor, uma vez por máquina. O token sai da webui:
+`https://rustploy-ms.itemize.com.br:9797` → **Settings → Web Server → "Conectar um
+agente (Claude Code)" → Copiar**. Os comandos vão **no terminal**, nunca no chat.
 
-1. Abrir `https://rustploy-ms.itemize.com.br:9797` e entrar.
-2. **Settings → Web Server → "Conectar um agente (Claude Code)" → Copiar**.
-3. Colar o comando copiado **no terminal** (não no chat). Ele tem a forma
-   `claude mcp add --transport http rustploy https://…/mcp --header "Authorization: Bearer …"`.
-4. Reiniciar o Claude Code.
+**Claude Code**: colar o comando copiado, que tem a forma
+`claude mcp add --transport http rustploy https://…/mcp --header "Authorization: Bearer …"`,
+e reiniciar o Claude Code.
+
+**Codex**: o token fica numa variável de ambiente, e o Codex a lê:
+
+```bash
+# o token é o texto depois de "Bearer " no comando copiado
+echo "export RUSTPLOY_TOKEN='<token>'" >> ~/.bashrc     # ou ~/.zshrc
+source ~/.bashrc
+codex mcp add rustploy --url https://rustploy-ms.itemize.com.br:9797/mcp --bearer-token-env-var RUSTPLOY_TOKEN
+codex mcp list    # rustploy … enabled … Bearer token
+```
+
+Depois, abrir uma sessão nova do Codex.
 
 O token é de administrador. **Nunca** o escreva em arquivo do repositório, em
-`.mcp.json` versionado, em issue ou no chat. Se ele aparecer no chat, avise a
-pessoa que o token precisa ser trocado.
+`.mcp.json` ou `.codex/config.toml` versionados, em issue ou no chat. Se ele aparecer
+no chat, avise a pessoa que o token precisa ser trocado.
 
 ## Codificação do `rpc`
 

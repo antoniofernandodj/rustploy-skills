@@ -4,6 +4,15 @@ Toda mudança numa skill entra aqui e sobe a `version` em
 `plugins/<plugin>/.claude-plugin/plugin.json` **e** em `.claude-plugin/marketplace.json`.
 Sem o bump, quem já instalou não recebe a atualização.
 
+## rustploy-apps 0.2.0 — 2026-11-18
+
+- Funciona também no **Codex** (testado no Codex CLI 0.154): ele lê o mesmo marketplace e o mesmo
+  plugin. `codex plugin marketplace add antoniofernandodj/rustploy-skills` +
+  `codex plugin add rustploy-apps@rustploy-skills`; MCP com
+  `codex mcp add rustploy --url … --bearer-token-env-var RUSTPLOY_TOKEN`.
+- O texto da skill ficou neutro: as ferramentas são citadas pelo nome do servidor `rustploy`, não
+  pelo prefixo do Claude Code, e a seção "Conectar" traz os dois agentes.
+
 ## rustploy-apps 0.1.0 — 2026-11-18
 
 - Primeira versão da skill `rustploy-app`: regras (segredos, senhas, seed, migrations,

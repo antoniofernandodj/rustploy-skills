@@ -42,7 +42,7 @@ só então limpe o histórico, se ela quiser.
 | nome do secret digitado diferente na variável (`JWT_SECRT`) | a variável chega **vazia, sem erro** | conferir com `SecretList`; o app deve recusar subir sem a variável |
 | mudar variável/secret e só dar `Reload` | o container antigo mantém o ambiente velho | **deploy** depois de mudar variável ou secret |
 | `ServiceUpdate` com só o campo novo | apaga o resto do spec | `ServiceGet` → muda um campo → manda o spec inteiro |
-| token do MCP salvo em arquivo do repo ou mostrado no chat | é token de administrador do servidor inteiro | só no `claude mcp add` no terminal; vazou → trocar |
+| token do MCP salvo em arquivo do repo ou mostrado no chat | é token de administrador do servidor inteiro | só na configuração do agente feita no terminal (`claude mcp add`, ou a variável `RUSTPLOY_TOKEN` do Codex); vazou → trocar |
 
 ## Banco, migrations e seed
 

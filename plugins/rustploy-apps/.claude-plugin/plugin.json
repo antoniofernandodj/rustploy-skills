@@ -1,6 +1,6 @@
 {
   "name": "rustploy-apps",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Cria apps (Rust/Axum/Postgres + Vue) e publica no rustploy-ms pelo MCP, com banco, migrations, seed, secrets, subdomínio e HTTPS.",
   "author": { "name": "Itemize" }
 }
