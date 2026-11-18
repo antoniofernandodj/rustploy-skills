@@ -36,7 +36,9 @@ só então limpe o histórico, se ela quiser.
 | valor padrão de segredo no código (`unwrap_or("dev-secret")`) | em produção, sem a variável, o app sobe com a senha pública | segredo **obrigatório**: sem a variável, o app **não sobe** e diz qual falta |
 | `ARG`/`ENV` com segredo no `Dockerfile` | fica gravado na imagem | o rustploy nem passa variáveis no build; leia em tempo de execução |
 | `VITE_API_KEY` ou qualquer segredo no frontend | tudo que vai para o navegador é público | segredo só no backend; o frontend chama o backend |
-| agente escolhe a senha e grava com `SecretSet`, ou pede para colar a senha no chat | a senha passou pelo agente e fica no histórico da conversa | a pessoa cria o secret na webui; o agente só usa o **nome** |
+| agente escolhe a senha e grava com `SecretSet`, escreve a senha num arquivo, ou pede para colar a senha no chat | a senha passou pelo agente e fica no histórico da conversa ou em texto puro no disco | `SecretGenerate`: o rustploy sorteia e guarda; a pessoa lê pelo 👁 da webui |
+| `SecretGenerate` com `Replace` num secret em uso | `JWT_SECRET` novo desloga todos; senha de banco trocada só no rustploy derruba o app | `on_exists: Keep` por padrão; `Replace` só com aviso e plano |
+| sortear chave de API de terceiro | o valor tem de ser o do fornecedor | a pessoa cria esse secret na webui; você indica o nome |
 | nome do secret digitado diferente na variável (`JWT_SECRT`) | a variável chega **vazia, sem erro** | conferir com `SecretList`; o app deve recusar subir sem a variável |
 | mudar variável/secret e só dar `Reload` | o container antigo mantém o ambiente velho | **deploy** depois de mudar variável ou secret |
 | `ServiceUpdate` com só o campo novo | apaga o resto do spec | `ServiceGet` → muda um campo → manda o spec inteiro |

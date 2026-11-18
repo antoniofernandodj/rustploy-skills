@@ -7,7 +7,8 @@ description: Cria, organiza e publica apps web da Itemize no servidor rustploy-m
 
 Quem pede costuma **não ser desenvolvedor**. Você é o engenheiro responsável: decida
 o técnico sozinho, seguindo esta skill, e só pergunte o que é **decisão de negócio**
-(nome do app, subdomínio, quem é o primeiro usuário, o que o sistema faz). Explique
+(nome do app, subdomínio, quem é o primeiro usuário, o que o sistema faz). Senhas,
+chaves e configuração técnica são com você: crie tudo sozinho. Explique
 em português simples o que está fazendo e por quê, sem jargão desnecessário.
 
 O pedido raramente vai citar banco, seed, secrets, healthcheck ou DNS. **Faça
@@ -21,11 +22,13 @@ está quebrado, mesmo que "funcione".
    migration, seed, `README` ou commit. Tudo vem de **variável de ambiente**, e o
    valor sensível mora num **secret** do rustploy. Antes de **todo** commit, rode a
    checagem de [references/erros-comuns.md](references/erros-comuns.md#checagem-antes-do-commit).
-2. **Você não escolhe nem vê senha.** Senhas e chaves são criadas por uma **pessoa**
-   na interface do rustploy (ou geradas pelo próprio rustploy). Não invente um
-   valor e mande por `SecretSet`, não imprima senha no chat e não peça para a
-   pessoa colar a senha na conversa. Diga **qual nome de secret** criar e onde
-   (passo a passo em [references/rustploy-mcp.md](references/rustploy-mcp.md#secrets)).
+2. **Senha quem sorteia é o rustploy, nunca você.** Toda senha ou chave nasce com
+   `SecretGenerate` (o daemon sorteia e grava cifrado; você recebe só o tamanho e uma
+   impressão digital). Nunca invente um valor para o `SecretSet`, nunca escreva senha em
+   arquivo, nunca imprima senha no chat e nunca peça para a pessoa colar uma senha na
+   conversa. Quando a pessoa precisa saber uma senha (o primeiro login), diga onde ler:
+   webui → projeto → **Secrets** → 👁 (passo a passo em
+   [references/rustploy-mcp.md](references/rustploy-mcp.md#secrets)).
 3. **Todo app com login nasce com usuário inicial**, criado por um **seed
    idempotente** que lê e-mail e senha do ambiente. Nunca usuário/senha fixos no
    código, nunca "admin/admin", nunca uma migration com hash de senha.
@@ -73,9 +76,8 @@ cada chamada em [references/rustploy-mcp.md](references/rustploy-mcp.md).
 4. **Checagem de segredos** e commit/push para o GitHub (repo **privado**).
 5. **Projeto e banco no rustploy**: `ProjectCreate`; `ManagedDatabaseCreate` no
    `pg-central` (grava `DATABASE_URL` no projeto sozinho).
-6. **Secrets**: peça à pessoa para criar `JWT_SECRET` e `ADMIN_PASSWORD` no
-   projeto (instruções prontas no rustploy-mcp.md). Espere ela confirmar e
-   verifique com `SecretList` (só nomes).
+6. **Secrets**: `SecretGenerate` de `JWT_SECRET` (`Hex`) e `ADMIN_PASSWORD`
+   (`Password`, 20) no projeto, com `on_exists: Keep`. Confira com `SecretList`.
 7. **Serviços**: `api` (Git, `backend/`, porta 8080, healthcheck `/api/health`,
    envs referenciando secrets) e `web` (Git, `frontend/`, porta 80, domínio com
    TLS). Copie a forma do spec de um serviço existente com `ServiceGet`.
@@ -87,8 +89,9 @@ cada chamada em [references/rustploy-mcp.md](references/rustploy-mcp.md).
    Espere resolver **antes** do deploy do `web`, senão o certificado não sai.
 10. **Deploy** com a ferramenta `deploy` (`wait: true`): primeiro `api`, depois
     `web`. Falhou? Leia o `error` e o `build_logs`, corrija, repita.
-11. **Verificar**: `curl -I https://<sub>/`, `curl https://<sub>/api/health`, login
-    com o primeiro usuário (a pessoa digita a senha no navegador, não você).
+11. **Verificar**: `curl -I https://<sub>/`, `curl https://<sub>/api/health`, e peça à
+    pessoa para entrar com o primeiro usuário (ela lê a senha no 👁 de `ADMIN_PASSWORD`
+    e digita no navegador; você não vê).
 12. **Entregar**: URL, e-mail do primeiro usuário, onde ficam as senhas (secrets
     do projeto no rustploy), e um `README.md` no repo com como rodar local e como
     publicar. Recomende trocar a senha inicial no primeiro acesso.

@@ -85,30 +85,52 @@ Não use `overwrite_env` sem entender o que já existe.
 
 ### 4. Secrets
 
-Secrets que todo app com login precisa (no **projeto**):
+Quem sorteia é o **daemon**, com `SecretGenerate`. O valor nunca chega até você:
 
-| Secret | Para quê | Como a pessoa gera |
+```json
+{"SecretGenerate":{"project_id":"<prj>","name":"JWT_SECRET","kind":"Hex","on_exists":"Keep"}}
+{"SecretGenerate":{"project_id":"<prj>","name":"ADMIN_PASSWORD","kind":"Password","length":20,"on_exists":"Keep"}}
+```
+
+Resposta: `{"SecretGenerated":{"name":"…","created":true,"length":20,"fingerprint":"a1b2c3d4"}}`.
+`created: false` = já existia e foi mantido (repetir é seguro com `Keep`).
+
+| Secret | `kind` | Para quê |
 |---|---|---|
-| `JWT_SECRET` | assinar os tokens de login | 64+ caracteres aleatórios: `openssl rand -base64 48` no terminal dela |
-| `ADMIN_PASSWORD` | senha do primeiro usuário | ela escolhe uma senha forte (12+ caracteres) |
+| `JWT_SECRET` | `Hex` (64) | assinar os tokens de login |
+| `ADMIN_PASSWORD` | `Password`, `length` 20 | senha do primeiro usuário |
+| outras chaves internas do app | `Hex` ou `Base64Url` | tokens de integração entre serviços do próprio app |
 
-Mensagem para a pessoa (adapte):
+Regras:
 
-> Preciso de duas senhas guardadas no cofre do rustploy. Eu não posso ver nem
-> escolher essas senhas. Abra https://rustploy-ms.itemize.com.br:9797, entre no
-> projeto **meuapp**, aba **Secrets**, e crie:
-> 1. nome `JWT_SECRET`, valor: o resultado de `openssl rand -base64 48`
->    (rode no seu terminal e cole o resultado);
-> 2. nome `ADMIN_PASSWORD`, valor: a senha que você quer usar no primeiro login.
-> Não cole esses valores aqui no chat. Me avise quando terminar.
+- **Nunca** `on_exists: "Replace"` num secret que já está em uso sem perguntar: o app
+  passa a ter outro valor no próximo deploy (`JWT_SECRET` novo desloga todo mundo;
+  `ADMIN_PASSWORD` novo **não** muda a senha de quem já existe, porque o seed não
+  sobrescreve).
+- Chave de API **de terceiro** (gateway de pagamento, e-mail, Google…) não se sorteia:
+  ela vem do painel do fornecedor. Peça para a pessoa criar o secret na webui
+  (projeto → **Secrets**), com o nome que você indicar, e confira com `SecretList`.
+  Nunca peça o valor no chat.
+- Secret com nome errado vira **texto vazio sem erro**: o nome do `SecretGenerate` e o
+  `{"Secret":"…"}` da variável têm de ser idênticos.
+- Daemon antigo responde `unknown variant SecretGenerate`: o rustploy-ms precisa ser
+  atualizado. Até lá, peça à pessoa para criar os secrets na webui
+  (valor de `JWT_SECRET`: `openssl rand -hex 32` no terminal dela) e avise quem cuida do
+  servidor.
 
-Depois confira só os nomes:
+**Como a pessoa lê uma senha gerada** (por exemplo, para o primeiro login). Mensagem
+pronta:
+
+> A senha do primeiro acesso foi gerada pelo próprio rustploy e eu não tenho acesso a
+> ela. Para ver: abra https://rustploy-ms.itemize.com.br:9797, entre no projeto
+> **meuapp**, aba **Secrets**, e clique no 👁 da linha `ADMIN_PASSWORD`. Entre em
+> https://meuapp.itemize.com.br com o e-mail `<e-mail>` e essa senha.
+
+Confira só os nomes:
 
 ```json
 {"SecretList":{"project_id":"<prj>"}}
 ```
-
-Secret com nome errado vira **texto vazio sem erro**. Confira letra por letra.
 
 ### 5. Serviço `api` (backend)
 
@@ -221,7 +243,7 @@ Crie o registro DNS **antes** deste deploy ([dns-hostinger.md](dns-hostinger.md)
 |---|---|
 | publicar código novo | `git push` → `deploy` do serviço (o job de pré-deploy roda sozinho) |
 | mudar uma variável | `EnvValueSet{project_id, service_id?, key, value}` → **deploy** |
-| trocar uma senha | a pessoa troca o secret na webui → **deploy** dos serviços que usam |
+| trocar uma chave do app | `SecretGenerate` com `on_exists: Replace` (pergunte antes) → **deploy** dos serviços que usam |
 | renomear variável sem ver o valor | `EnvKeyRename` / `SecretRename` |
 | ver log do app | `LogsGet{service_id, tail:200}`; antes do último deploy: `LogsHistory` |
 | voltar uma versão | `DeployRollback{service_id}` mostra o deploy anterior; confirme com a pessoa |
@@ -232,4 +254,4 @@ Crie o registro DNS **antes** deste deploy ([dns-hostinger.md](dns-hostinger.md)
 `SecretReveal`, `SecretMove` com `SecretToEnv`, `ServiceExport` com valores,
 `RegistryTokenCreate`, `RecoveryKeyGenerate`, `BackupDestinationSet`,
 `ServiceBackupRestore`, `StateGitResolve`, `ApplyUpdate`. Não use `SecretSet` com
-um valor que você inventou: senha é coisa da pessoa.
+um valor que você inventou: para sortear, `SecretGenerate`.
