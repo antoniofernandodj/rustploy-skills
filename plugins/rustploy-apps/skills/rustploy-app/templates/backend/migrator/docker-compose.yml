@@ -1,0 +1,18 @@
+# Job `migrate` do rustploy (fonte Git, compose_path: backend/migrator/docker-compose.yml,
+# main_service: migrate, gatilho: o serviço `api`). Roda antes de cada deploy do `api`
+# (pre_deploy_job_ids): aplica as migrations e cria o usuário inicial se ele não existir.
+#
+# As variáveis chegam pelo `.env` que o rustploy gera (projeto + serviço gatilho + job)
+# e só entram no container porque estão listadas aqui com ${...}.
+services:
+  migrate:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    command: ["/usr/local/bin/app-backend", "migrate-and-seed"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_NAME: ${ADMIN_NAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      RUST_LOG: info

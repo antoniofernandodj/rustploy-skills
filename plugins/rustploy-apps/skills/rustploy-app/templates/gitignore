@@ -1,0 +1,19 @@
+# Copiar para a raiz do repo do app como `.gitignore`.
+# Segredos: nunca versionar. Só o .env.example (com valores falsos) entra no git.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Rust
+backend/target/
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+
+# Sistema e editores
+.DS_Store
+.idea/
+*.log

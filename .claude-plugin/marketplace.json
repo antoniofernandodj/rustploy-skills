@@ -1,0 +1,15 @@
+{
+  "name": "rustploy-skills",
+  "owner": { "name": "Itemize" },
+  "metadata": {
+    "description": "Skills do Claude Code para criar e publicar apps no rustploy da Itemize."
+  },
+  "plugins": [
+    {
+      "name": "rustploy-apps",
+      "source": "./plugins/rustploy-apps",
+      "description": "Cria apps (Rust/Axum/Postgres + Vue) e publica no rustploy-ms pelo MCP, com banco, migrations, seed, secrets, subdomínio e HTTPS.",
+      "version": "0.1.0"
+    }
+  ]
+}

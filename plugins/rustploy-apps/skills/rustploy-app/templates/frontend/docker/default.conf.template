@@ -1,0 +1,52 @@
+# Processado por envsubst na subida (imagem oficial do nginx). Só variáveis de ambiente
+# definidas são trocadas; as do nginx ($uri, $host…) passam intactas.
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # DNS do container, relido a cada 10 s: cada deploy do backend cria um container com IP novo.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+
+    client_max_body_size 20m;
+    server_tokens off;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+
+    # Healthcheck do rustploy para este serviço.
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 'ok';
+    }
+
+    # Repasse para o backend. A variável em proxy_pass força resolver o nome a cada requisição.
+    location /api/ {
+        set $api_upstream ${API_UPSTREAM};
+        proxy_pass $api_upstream$request_uri;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 120s;
+    }
+
+    # Arquivos do Vite têm hash no nome: cache longo é seguro.
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable" always;
+    }
+
+    # index.html nunca em cache, e qualquer rota do Vue Router cai nele.
+    location / {
+        add_header Cache-Control "no-cache" always;
+        try_files $uri $uri/ /index.html;
+    }
+}
